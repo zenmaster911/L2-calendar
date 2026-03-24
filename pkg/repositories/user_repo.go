@@ -2,12 +2,12 @@ package repositories
 
 import "github.com/jmoiron/sqlx"
 
-type UserPostgres struct {
+type UsersPostgres struct {
 	db *sqlx.DB
 }
 
-func NewUserPostgres(db sqlx.DB) *UserPostgres {
-	return &UserPostgres{
+func NewUsersPostgres(db sqlx.DB) *UsersPostgres {
+	return &UsersPostgres{
 		db: &db,
 	}
 }

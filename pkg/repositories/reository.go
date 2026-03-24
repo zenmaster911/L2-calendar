@@ -1,12 +1,12 @@
 package repositories
 
 type Rpository struct {
-	User
-	Event
+	Users
+	Events
 }
 
-type User interface {
+type Users interface {
 }
 
-type Event interface {
+type Events interface {
 }
