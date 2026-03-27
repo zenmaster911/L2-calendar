@@ -1,13 +1,26 @@
 package repositories
 
-import "github.com/jmoiron/sqlx"
+import (
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type UsersPostgres struct {
 	db *sqlx.DB
 }
 
-func NewUsersPostgres(db sqlx.DB) *UsersPostgres {
+func NewUsersPostgres(db *sqlx.DB) *UsersPostgres {
 	return &UsersPostgres{
-		db: &db,
+		db: db,
 	}
+}
+
+func (r *UsersPostgres) NewUser() (int, error) {
+	var id int
+	query := " INSERT INTO users DDEFAULT VALUES"
+	if err := r.db.QueryRow(query).Scan(&id); err != nil {
+		return 0, fmt.Errorf("failed to add user to DB: %s", err)
+	}
+	return id, nil
 }

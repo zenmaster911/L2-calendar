@@ -3,6 +3,7 @@ package repositories
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/znmaster911/L2-calendar/internal/models"
@@ -74,4 +75,21 @@ func (r *EventsPostgres) UpdateEvent(userID, eventID int64, input models.UpdateE
 	args = append(args, eventID, userID)
 	_, err := r.db.Exec(query, args...)
 	return err
+}
+
+func (r *EventsPostgres) DeleteEvent(userID, eventID int64) error {
+	query := "DELETE * FROM events e USING user_events ue WHERE e.id=ue.event_id AND ue.event_id=$1 AND ue.user_id=$2"
+	_, err := r.db.Exec(query, userID, eventID)
+	return err
+}
+
+func (r *EventsPostgres) GetEvents(dateStart, dateEnd time.Time, userID int) ([]models.Reply, error) {
+	var relpies []models.Reply
+	query := `SELECT e.title, e.description FROM events e 
+	INNER JOIN user_events ue ON e.id=ue.event_id
+	WHERE e.deadline>$1 AND e.starts<$2 AND ue.user_id=$3`
+	if err := r.db.Select(&relpies, query, dateStart, dateEnd, userID); err != nil {
+		return nil, fmt.Errorf("failed to get events: %s", err)
+	}
+	return relpies, nil
 }
