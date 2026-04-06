@@ -87,7 +87,7 @@ func (r *EventsPostgres) GetEvents(dateStart, dateEnd time.Time, userID int) ([]
 	var relpies []models.Reply
 	query := `SELECT e.title, e.description FROM events e 
 	INNER JOIN user_events ue ON e.id=ue.event_id
-	WHERE e.deadline>$1 AND e.starts<$2 AND ue.user_id=$3`
+	WHERE e.deadline>=$1 AND e.starts<=$2 AND ue.user_id=$3`
 	if err := r.db.Select(&relpies, query, dateStart, dateEnd, userID); err != nil {
 		return nil, fmt.Errorf("failed to get events: %s", err)
 	}

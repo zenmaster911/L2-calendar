@@ -11,11 +11,11 @@ func MustLoad() *Config {
 	viper.SetConfigFile(ConfigPath)
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal("failed to read config: %s", err)
+		log.Fatalf("failed to read config: %s", err)
 	}
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		log.Fatal("faield to unmarshal data: %s", err)
+		log.Fatalf("faield to unmarshal data: %s", err)
 	}
 	return &cfg
 }

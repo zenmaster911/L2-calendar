@@ -16,8 +16,8 @@ func NewUsersPostgres(db *sqlx.DB) *UsersPostgres {
 	}
 }
 
-func (r *UsersPostgres) NewUser() (int, error) {
-	var id int
+func (r *UsersPostgres) NewUser() (int64, error) {
+	var id int64
 	query := " INSERT INTO users DDEFAULT VALUES"
 	if err := r.db.QueryRow(query).Scan(&id); err != nil {
 		return 0, fmt.Errorf("failed to add user to DB: %s", err)
