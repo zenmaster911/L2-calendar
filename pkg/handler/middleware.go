@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 const tformat = "2006-01-02"
@@ -97,18 +99,28 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 	})
 }
 
-func getUserId(w http.ResponseWriter, r *http.Request) (userID int64, err error) {
+func getUserId(w http.ResponseWriter, r *http.Request) (userID int64) {
 	userIDraw := r.Context().Value("userID")
 	if userIDraw == nil {
 		http.Error(w, "no User ID in context", http.StatusUnauthorized)
-		return 0, fmt.Errorf("no user with current ID found")
+		return -1
 	}
 
 	userID, ok := userIDraw.(int64)
 	if !ok {
 		http.Error(w, fmt.Sprintf("wrong type of user ID in context %d", userID), http.StatusInternalServerError)
-		return 0, fmt.Errorf("wrong type of user ID in context")
+		return -1
 	}
 
-	return userID, nil
+	return userID
+}
+
+func GetEventId(w http.ResponseWriter, r *http.Request) (eventID int64) {
+	param := chi.URLParam(r, "event_id")
+	eventID, err := strconv.ParseInt(param, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get eventID %s", err), http.StatusBadRequest)
+		return -1
+	}
+	return eventID
 }

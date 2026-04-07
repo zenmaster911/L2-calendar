@@ -33,10 +33,7 @@ func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
-	userId, err := getUserId(w, r)
-	if err != nil {
-		return
-	}
+	userId := getUserId(w, r)
 
 	var input models.Event
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -52,4 +49,30 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func
+func (h *Handler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
+	userId := getUserId(w, r)
+	eventID := GetEventId(w, r)
+
+	var input models.UpdateEvent
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, fmt.Sprintf("failed to get event data, %s", err), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Services.Events.UpdateEvent(userId, eventID, input); err != nil {
+		http.Error(w, fmt.Sprintf("failed to update event %s", err), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
+	userId := getUserId(w, r)
+	eventID := GetEventId(w, r)
+
+	if err := h.Services.Events.DeleteEvent(userId, eventID); err != nil {
+		http.Error(w, fmt.Sprintf("failed to write input data to database %s", err), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

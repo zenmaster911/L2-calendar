@@ -30,8 +30,8 @@ func (h *Handler) InitRouter() *chi.Mux {
 	router.Route("/events", func(r chi.Router) {
 		r.Use(h.userIdentity)
 		r.Post("/", h.CreateEvent)
-		r.Delete("/{event_id}", h.Delete)
-		r.Patch("/{event_id}", h.Update)
+		r.Delete("/{event_id}", h.DeleteEvent)
+		r.Patch("/{event_id}", h.UpdateEvent)
 	})
 
 	router.Route("/users", func(r chi.Router) {
