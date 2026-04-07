@@ -12,6 +12,10 @@ func NewUserService(repo repositories.Users) *UserService {
 	}
 }
 
-func (s *UserService) NewUser() (int, error) {
-	return s.repo.NewUser()
+func (s *UserService) NewUser(username string) (int64, error) {
+	return s.repo.NewUser(username)
+}
+
+func (s *UserService) LogIn(username string) (int64, error) {
+	return s.repo.LogIn(username)
 }

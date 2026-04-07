@@ -3,7 +3,13 @@ package models
 import "time"
 
 type User struct {
-	id int64
+	Id       int64  `json:"id" db:"id"`
+	Username string `json:"username" db:"username"`
+}
+
+type LogIn struct {
+	Username string `json:"username" db:"username"`
+	//potential password
 }
 
 type Event struct {

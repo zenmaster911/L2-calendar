@@ -1,6 +1,7 @@
-package middleware
+package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -77,4 +78,37 @@ func EndDateReceiver(date []string, order int) (string, error) {
 		endDate += indDate + "-"
 	}
 	return endDate, nil
+}
+
+func (h *Handler) userIdentity(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		header := r.Header.Get("User_id")
+		if header == "" {
+			http.Error(w, "empty authorization header", http.StatusUnauthorized)
+			return
+		}
+		id, err := strconv.ParseInt(header, 10, 64)
+		if err != nil {
+			http.Error(w, "failed to get user identity", http.StatusInternalServerError)
+			return
+		}
+		ctx := context.WithValue(r.Context(), "userId", id)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func getUserId(w http.ResponseWriter, r *http.Request) (userID int64, err error) {
+	userIDraw := r.Context().Value("userID")
+	if userIDraw == nil {
+		http.Error(w, "no User ID in context", http.StatusUnauthorized)
+		return 0, fmt.Errorf("no user with current ID found")
+	}
+
+	userID, ok := userIDraw.(int64)
+	if !ok {
+		http.Error(w, fmt.Sprintf("wrong type of user ID in context %d", userID), http.StatusInternalServerError)
+		return 0, fmt.Errorf("wrong type of user ID in context")
+	}
+
+	return userID, nil
 }

@@ -2,15 +2,15 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/znmaster911/L2-calendar/internal/models"
-	"github.com/znmaster911/L2-calendar/pkg/handler/middleware"
 )
 
 func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
-	dateStart, dateEnd, userID, err := middleware.GetParser(r)
+	dateStart, dateEnd, userID, err := GetParser(r)
 	if err != nil {
 		log.Printf("order existance check error: %v", err)
 		http.Error(w, "extracting order data error", http.StatusInternalServerError)
@@ -31,3 +31,25 @@ func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error encoding response", http.StatusInternalServerError)
 	}
 }
+
+func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
+	userId, err := getUserId(w, r)
+	if err != nil {
+		return
+	}
+
+	var input models.Event
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, fmt.Sprintf("failed to get event data, %s", err), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Services.Events.NewEvent(userId, input); err != nil {
+		http.Error(w, fmt.Sprintf("failed to write input data to database %s", err), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+}
+
+func

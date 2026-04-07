@@ -21,14 +21,22 @@ func (h *Handler) InitRouter() *chi.Mux {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
+	router.Route("/auth", func(r chi.Router) {
+		r.Post("/", h.LogIn)
+	})
+
 	// router.Get("/{order_uid}&{date}", h.GetOrder)
 	router.Get("/", h.GetEvent)
-	router.Post("/", h.CreateEvent)
-	router.Delete("/", h.Delete) //{event_id}
-	router.Patch("/", h.Update)  //{event_id}
-	router.Route("/user", func(r chi.Router) {
-		r.Post("/", h.NewUser)
+	router.Route("/events", func(r chi.Router) {
+		r.Use(h.userIdentity)
+		r.Post("/", h.CreateEvent)
+		r.Delete("/{event_id}", h.Delete)
+		r.Patch("/{event_id}", h.Update)
 	})
-	chi.
+
+	router.Route("/users", func(r chi.Router) {
+		r.Post("/", h.NewUser) //
+	})
+
 	return router
 }

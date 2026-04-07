@@ -13,7 +13,8 @@ type Services struct {
 }
 
 type Users interface {
-	NewUser() (int, error)
+	NewUser(username string) (int64, error)
+	LogIn(username string) (int64, error)
 }
 
 type Events interface {

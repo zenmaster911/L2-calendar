@@ -13,7 +13,9 @@ type Rpository struct {
 }
 
 type Users interface {
-	NewUser() (int, error)
+	NewUser(string) (int64, error)
+	LogIn(username string) (int64, error)
+	UserExists(username string) (bool, error)
 }
 
 type Events interface {
