@@ -64,6 +64,7 @@ func (h *Handler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+
 }
 
 func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
