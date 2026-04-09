@@ -4,18 +4,18 @@ import "time"
 
 type User struct {
 	Id       int64  `json:"id" db:"id"`
-	Username string `json:"username" db:"username"`
+	Username string `json:"username" validate:"required" db:"username"`
 }
 
 type LogIn struct {
-	Username string `json:"username" db:"username"`
+	Username string `json:"username" validate:"required" db:"username"`
 	//potential password
 }
 
 type Event struct {
 	ID          int64     `json:"id" db:"id"`
 	Description string    `json:"description" db:"description"`
-	Title       string    `json:"title" db:"title"`
+	Title       string    `json:"title" validate:"required" db:"title"`
 	Starts      time.Time `json:"starts" validate:"required" db:"starts"`
 	Deadline    time.Time `json:"deadline" db:"deadline"`
 	Created     time.Time `json:"created" validate:"required" db:"created"`

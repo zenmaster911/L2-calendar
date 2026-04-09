@@ -14,7 +14,7 @@ type DBConfig struct {
 	SSLMode         string `mapstructure:"sslmode"`
 	MaxOpenConns    int    `mapstructure:"open_conns"`
 	MaxIdleConns    int    `mapstructure:"idle_conns"`
-	MaxIdleLifetime int    `mapstructure:"Idle_lifetime"`
+	MaxIdleLifetime int    `mapstructure:"idle_lifetime"`
 	MaxRetries      int    `mapstructure:"db_retries"`
 	RetryDelay      int    `mapstructure:"db_retry_delay"`
 }

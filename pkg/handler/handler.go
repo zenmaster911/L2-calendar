@@ -18,6 +18,7 @@ func (h *Handler) InitRouter() *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
+	// router.Use(middleware.req)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
