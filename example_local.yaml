@@ -1,5 +1,5 @@
-# app:
-#   port:"8081"
+app:
+  port: "8081"
 
 db:
   host: "localhost"
@@ -12,3 +12,6 @@ db:
   idle_lifetime: "2"
   db_retries: "5"
   db_retry_delay: "3"
+
+log:
+  path: "./logs.txt"

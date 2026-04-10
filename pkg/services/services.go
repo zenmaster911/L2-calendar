@@ -24,7 +24,7 @@ type Events interface {
 	GetEvents(dateStart, dateEnd time.Time, userID int) ([]models.Reply, error)
 }
 
-func NewService(repo repositories.Rpository) *Services {
+func NewService(repo *repositories.Rpository) *Services {
 	return &Services{
 		Users:  NewUserService(repo.Users),
 		Events: NewEventService(repo.Events),

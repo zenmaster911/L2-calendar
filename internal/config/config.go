@@ -3,6 +3,7 @@ package config
 type Config struct {
 	App *AppConfig
 	DB  *DBConfig
+	Log *LogConfig
 }
 
 type DBConfig struct {
@@ -21,4 +22,8 @@ type DBConfig struct {
 
 type AppConfig struct {
 	Port string `mapstructure:"port"`
+}
+
+type LogConfig struct {
+	Path string `mapstructure:"path"`
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type DB struct {
-	db         *sqlx.DB
+	DB         *sqlx.DB
 	MaxRetries int
 	RetryDelay int
 }
@@ -21,6 +21,7 @@ func NewPostgresDb(cfg config.DBConfig) (*DB, error) {
 
 	db, err := sqlx.Connect("pgx", dsn)
 	if err != nil {
+		log.Print(dsn)
 		return nil, fmt.Errorf("failed to connect to DB: %s", err)
 	}
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
@@ -32,14 +33,14 @@ func NewPostgresDb(cfg config.DBConfig) (*DB, error) {
 	}
 
 	return &DB{
-		db:         db,
+		DB:         db,
 		MaxRetries: cfg.MaxRetries,
 		RetryDelay: cfg.RetryDelay,
 	}, nil
 }
 
 func (d *DB) DbInit() {
-	tx, err := d.db.Begin()
+	tx, err := d.DB.Begin()
 	if err != nil {
 		log.Fatalf("failed to start transaction %s", err)
 	}

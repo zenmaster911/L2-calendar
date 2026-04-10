@@ -2,7 +2,9 @@ package config
 
 import (
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -17,5 +19,9 @@ func MustLoad() *Config {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Fatalf("faield to unmarshal data: %s", err)
 	}
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("failed to load env file: %s", err)
+	}
+	cfg.DB.Password = os.Getenv("DB_PASSWORD")
 	return &cfg
 }
