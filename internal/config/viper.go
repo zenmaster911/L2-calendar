@@ -7,7 +7,7 @@ import (
 )
 
 func MustLoad() *Config {
-	ConfigPath := "local.yaml"
+	ConfigPath := "example_local.yaml"
 	viper.SetConfigFile(ConfigPath)
 
 	if err := viper.ReadInConfig(); err != nil {
