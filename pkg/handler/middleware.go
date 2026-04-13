@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 const tformat = "2006-01-02"
@@ -85,23 +87,6 @@ func EndDateReceiver(date []string, order int) (string, error) {
 	return endDate[:10], nil
 }
 
-func (h *Handler) userIdentity(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		header := r.Header.Get("User_id")
-		if header == "" {
-			http.Error(w, "empty authorization header", http.StatusUnauthorized)
-			return
-		}
-		id, err := strconv.ParseInt(header, 10, 64)
-		if err != nil {
-			http.Error(w, "failed to get user identity", http.StatusInternalServerError)
-			return
-		}
-		ctx := context.WithValue(r.Context(), "userId", id)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
 func getUserId(w http.ResponseWriter, r *http.Request) (userID int64) {
 	userIDraw := r.Context().Value("userId")
 	if userIDraw == nil {
@@ -126,4 +111,35 @@ func GetEventId(w http.ResponseWriter, r *http.Request) (eventID int64) {
 		return -1
 	}
 	return eventID
+}
+
+func (h *Handler) userIdentity(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		header := r.Header.Get("User_id")
+		if header == "" {
+			http.Error(w, "empty authorization header", http.StatusUnauthorized)
+			return
+		}
+		id, err := strconv.ParseInt(header, 10, 64)
+		if err != nil {
+			http.Error(w, "failed to get user identity", http.StatusInternalServerError)
+			return
+		}
+		ctx := context.WithValue(r.Context(), "userId", id)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (h *Handler) rLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqID := middleware.GetReqID(r.Context())
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		h.Logger.Logger.Info("http request",
+			slog.String("req_id", reqID),
+			slog.String("method", r.Method),
+			slog.String("path", r.URL.Path),
+			slog.Duration("duration", time.Since(start)),
+		)
+	})
 }

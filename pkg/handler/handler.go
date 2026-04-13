@@ -3,21 +3,23 @@ package handler
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/znmaster911/L2-calendar/internal/logger"
 	"github.com/znmaster911/L2-calendar/pkg/services"
 )
 
 type Handler struct {
 	Services *services.Services
+	Logger   *logger.Logger
 }
 
-func NewHandler(services *services.Services) *Handler {
-	return &Handler{Services: services}
+func NewHandler(services *services.Services, logg *logger.Logger) *Handler {
+	return &Handler{Services: services, Logger: logg}
 }
 
 func (h *Handler) InitRouter() *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
+	router.Use(h.rLogger)
 	// router.Use(middleware.req)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
