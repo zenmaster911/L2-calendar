@@ -15,24 +15,24 @@ import (
 const tformat = "2006-01-02"
 
 func GetParser(r *http.Request) (dateStart, dateEnd time.Time, userID int, err error) {
-	rawUrl := r.URL.RawPath
-	p, err := url.Parse(rawUrl)
+	rawQuery := r.URL.RawQuery
+	p, err := url.ParseQuery(rawQuery)
 	if err != nil {
 		return time.Now(), time.Now(), 0, fmt.Errorf("failed to get data from query string %s", err)
 	}
-	q := p.Query()
-	rawdate := q.Get("date")
+	rawdate := p.Get("date")
 	dataslc := strings.Split(rawdate, "-")
 	order := len(dataslc)
 	switch order {
 	case 1:
-		dataslc = append(dataslc, "01", "1")
+		dataslc = append(dataslc, "01", "01")
 	case 2:
-		dataslc = append(dataslc, "1")
+		dataslc = append(dataslc, "01")
 	case 3:
 	default:
 		return time.Now(), time.Now(), -1, fmt.Errorf("invalid data format %s", err)
 	}
+
 	enddata, err := EndDateReceiver(dataslc, order)
 	if err != nil {
 		return time.Now(), time.Now(), -1, fmt.Errorf("failed to get date %s", err)
@@ -43,10 +43,11 @@ func GetParser(r *http.Request) (dateStart, dateEnd time.Time, userID int, err e
 	}
 
 	dateStart, err = time.Parse(tformat, strings.Join(dataslc, "-"))
+
 	if err != nil {
 		return time.Now(), time.Now(), -1, fmt.Errorf("failed to parse closing date %s", err)
 	}
-	userID, err = strconv.Atoi(q.Get("user_id"))
+	userID, err = strconv.Atoi(p.Get("user_id"))
 	if err != nil {
 		return time.Now(), time.Now(), -1, fmt.Errorf("failed to get user_id from query string  %s", err)
 	}
@@ -70,6 +71,8 @@ func EndDateReceiver(date []string, order int) (string, error) {
 		if endDateIntSlc[1] == 12 {
 			endDateIntSlc[0]++
 			endDateIntSlc[1] = 1
+		} else {
+			endDateIntSlc[1]++
 		}
 	}
 	for _, v := range endDateIntSlc {
@@ -79,7 +82,7 @@ func EndDateReceiver(date []string, order int) (string, error) {
 		}
 		endDate += indDate + "-"
 	}
-	return endDate, nil
+	return endDate[:10], nil
 }
 
 func (h *Handler) userIdentity(next http.Handler) http.Handler {
@@ -100,7 +103,7 @@ func (h *Handler) userIdentity(next http.Handler) http.Handler {
 }
 
 func getUserId(w http.ResponseWriter, r *http.Request) (userID int64) {
-	userIDraw := r.Context().Value("userID")
+	userIDraw := r.Context().Value("userId")
 	if userIDraw == nil {
 		http.Error(w, "no User ID in context", http.StatusUnauthorized)
 		return -1

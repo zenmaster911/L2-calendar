@@ -76,7 +76,7 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	logg.Info("server started sucessfully")
+	logg.Info("server started sucessfully and running on", "port", cfg.App.Port)
 	wg.Wait()
 	logg.Info("server stopped")
 

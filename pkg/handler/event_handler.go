@@ -25,6 +25,12 @@ func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "extracting order data error", http.StatusInternalServerError)
 		return
 	}
+	if reply == nil {
+		w.WriteHeader(http.StatusNoContent)
+		log.Printf("no events were found")
+		return
+	}
+	fmt.Println(reply)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(&reply); err != nil {
@@ -73,6 +79,7 @@ func (h *Handler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.Services.Events.DeleteEvent(userId, eventID); err != nil {
 		http.Error(w, fmt.Sprintf("failed to write input data to database %s", err), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)

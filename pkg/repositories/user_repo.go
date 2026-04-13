@@ -36,7 +36,7 @@ func (r *UsersPostgres) NewUser(username string) (int64, error) {
 
 func (r *UsersPostgres) LogIn(username string) (int64, error) {
 	var id int64
-	query := "GET id FROM users WHERE username=$1"
+	query := "SELECT id FROM users WHERE username=$1"
 	err := r.db.Get(&id, query, username)
 	if err != nil {
 		return -1, fmt.Errorf("failed to get user id due to %w", err)
@@ -46,7 +46,7 @@ func (r *UsersPostgres) LogIn(username string) (int64, error) {
 
 func (r *UsersPostgres) UserExists(username string) (bool, error) {
 	exists := false
-	query := "SELECT EXISTS(SLECT 1 FROM users WHERE username=$1)"
+	query := "SELECT EXISTS(SELECT 1 FROM users WHERE username=$1)"
 	if err := r.db.QueryRow(query, username).Scan(&exists); err != nil {
 		return false, fmt.Errorf("failed to check user existance due to %w", err)
 	}
