@@ -7,6 +7,7 @@ import (
 	"github.com/znmaster911/L2-calendar/internal/models"
 )
 
+//go:generate minimock -i github.com/znmaster911/L2-calendar/pkg/repositories.* -o ./mocks -s _mock.go
 type Rpository struct {
 	Users
 	Events

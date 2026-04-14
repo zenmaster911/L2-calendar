@@ -1,3 +1,10 @@
 time=2026-04-13T16:57:13.691+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/cmd/main.go:79 msg="server started sucessfully and running on" port=8081
 time=2026-04-13T16:57:18.843+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/pkg/handler/middleware.go:138 msg="http request" req_id=DESKTOP-R9TS3M6/xLGZJAE8HO-000001 method=GET path=/ duration=3.251267ms
 time=2026-04-13T16:57:52.865+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/pkg/handler/middleware.go:138 msg="http request" req_id=DESKTOP-R9TS3M6/xLGZJAE8HO-000002 method=POST path=/events duration=9.257465ms
+time=2026-04-14T13:34:25.247+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/cmd/main.go:79 msg="server started sucessfully and running on" port=8081
+time=2026-04-14T13:34:53.345+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/pkg/handler/middleware.go:138 msg="http request" req_id=DESKTOP-R9TS3M6/dvgTMxS28K-000001 method=POST path=/events duration=15.612372ms
+time=2026-04-14T13:35:11.811+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/internal/logger/log.go:45 msg="termination signal received"
+time=2026-04-14T13:35:11.811+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/cmd/main.go:81 msg="server stopped"
+time=2026-04-14T13:53:15.564+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/cmd/main.go:79 msg="server started sucessfully and running on" port=8081
+time=2026-04-14T13:53:22.070+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/internal/logger/log.go:45 msg="termination signal received"
+time=2026-04-14T13:53:22.072+03:00 level=INFO source=/home/mazdan/go_projects/wb_school/L2-calendar/cmd/main.go:81 msg="server stopped"
