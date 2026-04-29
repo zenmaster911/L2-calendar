@@ -9,6 +9,8 @@ import (
 	"github.com/znmaster911/L2-calendar/internal/models"
 )
 
+var EmptyUpdateError = fmt.Errorf("no parameters entered to be updated")
+
 type EventsPostgres struct {
 	db *sqlx.DB
 }
@@ -40,6 +42,7 @@ func (r *EventsPostgres) NewEvent(userId int64, event models.Event) error {
 }
 
 func (r *EventsPostgres) UpdateEvent(userID, eventID int64, input models.UpdateEvent) error {
+
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argID := 1
@@ -68,6 +71,10 @@ func (r *EventsPostgres) UpdateEvent(userID, eventID int64, input models.UpdateE
 		argID++
 	}
 
+	if len(args) == 0 {
+		return EmptyUpdateError
+	}
+
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE events e SET %s FROM users_events ue WHERE e.id=ue.event_id AND ue.event_id=$%d AND ue.user_id=$%d",
 		setQuery, argID, argID+1)
@@ -91,4 +98,13 @@ func (r *EventsPostgres) GetEvents(dateStart, dateEnd time.Time, userID int) ([]
 		return nil, fmt.Errorf("failed to get events: %s", err)
 	}
 	return relpies, nil
+}
+
+func (r *EventsPostgres) EventExists(userid, eventid int64) (bool, error) {
+	var exists bool
+	query := "SELECT EXISTS(SELECT 1 FROM users_events WHERE event_id=$1 AND user_id=$2)"
+	if err := r.db.QueryRow(query, userid, eventid).Scan(&exists); err != nil {
+		return false, fmt.Errorf("failed to check event existance %w", err)
+	}
+	return exists, nil
 }

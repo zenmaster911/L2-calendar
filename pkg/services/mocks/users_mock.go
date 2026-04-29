@@ -30,6 +30,13 @@ type UsersMock struct {
 	afterNewUserCounter  uint64
 	beforeNewUserCounter uint64
 	NewUserMock          mUsersMockNewUser
+
+	funcUserExists          func(id int64) (b1 bool, err error)
+	funcUserExistsOrigin    string
+	inspectFuncUserExists   func(id int64)
+	afterUserExistsCounter  uint64
+	beforeUserExistsCounter uint64
+	UserExistsMock          mUsersMockUserExists
 }
 
 // NewUsersMock returns a mock for mm_services.Users
@@ -45,6 +52,9 @@ func NewUsersMock(t minimock.Tester) *UsersMock {
 
 	m.NewUserMock = mUsersMockNewUser{mock: m}
 	m.NewUserMock.callArgs = []*UsersMockNewUserParams{}
+
+	m.UserExistsMock = mUsersMockUserExists{mock: m}
+	m.UserExistsMock.callArgs = []*UsersMockUserExistsParams{}
 
 	t.Cleanup(m.MinimockFinish)
 
@@ -675,6 +685,318 @@ func (m *UsersMock) MinimockNewUserInspect() {
 	}
 }
 
+type mUsersMockUserExists struct {
+	optional           bool
+	mock               *UsersMock
+	defaultExpectation *UsersMockUserExistsExpectation
+	expectations       []*UsersMockUserExistsExpectation
+
+	callArgs []*UsersMockUserExistsParams
+	mutex    sync.RWMutex
+
+	expectedInvocations       uint64
+	expectedInvocationsOrigin string
+}
+
+// UsersMockUserExistsExpectation specifies expectation struct of the Users.UserExists
+type UsersMockUserExistsExpectation struct {
+	mock               *UsersMock
+	params             *UsersMockUserExistsParams
+	paramPtrs          *UsersMockUserExistsParamPtrs
+	expectationOrigins UsersMockUserExistsExpectationOrigins
+	results            *UsersMockUserExistsResults
+	returnOrigin       string
+	Counter            uint64
+}
+
+// UsersMockUserExistsParams contains parameters of the Users.UserExists
+type UsersMockUserExistsParams struct {
+	id int64
+}
+
+// UsersMockUserExistsParamPtrs contains pointers to parameters of the Users.UserExists
+type UsersMockUserExistsParamPtrs struct {
+	id *int64
+}
+
+// UsersMockUserExistsResults contains results of the Users.UserExists
+type UsersMockUserExistsResults struct {
+	b1  bool
+	err error
+}
+
+// UsersMockUserExistsOrigins contains origins of expectations of the Users.UserExists
+type UsersMockUserExistsExpectationOrigins struct {
+	origin   string
+	originId string
+}
+
+// Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
+// the test will fail minimock's automatic final call check if the mocked method was not called at least once.
+// Optional() makes method check to work in '0 or more' mode.
+// It is NOT RECOMMENDED to use this option unless you really need it, as default behaviour helps to
+// catch the problems when the expected method call is totally skipped during test run.
+func (mmUserExists *mUsersMockUserExists) Optional() *mUsersMockUserExists {
+	mmUserExists.optional = true
+	return mmUserExists
+}
+
+// Expect sets up expected params for Users.UserExists
+func (mmUserExists *mUsersMockUserExists) Expect(id int64) *mUsersMockUserExists {
+	if mmUserExists.mock.funcUserExists != nil {
+		mmUserExists.mock.t.Fatalf("UsersMock.UserExists mock is already set by Set")
+	}
+
+	if mmUserExists.defaultExpectation == nil {
+		mmUserExists.defaultExpectation = &UsersMockUserExistsExpectation{}
+	}
+
+	if mmUserExists.defaultExpectation.paramPtrs != nil {
+		mmUserExists.mock.t.Fatalf("UsersMock.UserExists mock is already set by ExpectParams functions")
+	}
+
+	mmUserExists.defaultExpectation.params = &UsersMockUserExistsParams{id}
+	mmUserExists.defaultExpectation.expectationOrigins.origin = minimock.CallerInfo(1)
+	for _, e := range mmUserExists.expectations {
+		if minimock.Equal(e.params, mmUserExists.defaultExpectation.params) {
+			mmUserExists.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmUserExists.defaultExpectation.params)
+		}
+	}
+
+	return mmUserExists
+}
+
+// ExpectIdParam1 sets up expected param id for Users.UserExists
+func (mmUserExists *mUsersMockUserExists) ExpectIdParam1(id int64) *mUsersMockUserExists {
+	if mmUserExists.mock.funcUserExists != nil {
+		mmUserExists.mock.t.Fatalf("UsersMock.UserExists mock is already set by Set")
+	}
+
+	if mmUserExists.defaultExpectation == nil {
+		mmUserExists.defaultExpectation = &UsersMockUserExistsExpectation{}
+	}
+
+	if mmUserExists.defaultExpectation.params != nil {
+		mmUserExists.mock.t.Fatalf("UsersMock.UserExists mock is already set by Expect")
+	}
+
+	if mmUserExists.defaultExpectation.paramPtrs == nil {
+		mmUserExists.defaultExpectation.paramPtrs = &UsersMockUserExistsParamPtrs{}
+	}
+	mmUserExists.defaultExpectation.paramPtrs.id = &id
+	mmUserExists.defaultExpectation.expectationOrigins.originId = minimock.CallerInfo(1)
+
+	return mmUserExists
+}
+
+// Inspect accepts an inspector function that has same arguments as the Users.UserExists
+func (mmUserExists *mUsersMockUserExists) Inspect(f func(id int64)) *mUsersMockUserExists {
+	if mmUserExists.mock.inspectFuncUserExists != nil {
+		mmUserExists.mock.t.Fatalf("Inspect function is already set for UsersMock.UserExists")
+	}
+
+	mmUserExists.mock.inspectFuncUserExists = f
+
+	return mmUserExists
+}
+
+// Return sets up results that will be returned by Users.UserExists
+func (mmUserExists *mUsersMockUserExists) Return(b1 bool, err error) *UsersMock {
+	if mmUserExists.mock.funcUserExists != nil {
+		mmUserExists.mock.t.Fatalf("UsersMock.UserExists mock is already set by Set")
+	}
+
+	if mmUserExists.defaultExpectation == nil {
+		mmUserExists.defaultExpectation = &UsersMockUserExistsExpectation{mock: mmUserExists.mock}
+	}
+	mmUserExists.defaultExpectation.results = &UsersMockUserExistsResults{b1, err}
+	mmUserExists.defaultExpectation.returnOrigin = minimock.CallerInfo(1)
+	return mmUserExists.mock
+}
+
+// Set uses given function f to mock the Users.UserExists method
+func (mmUserExists *mUsersMockUserExists) Set(f func(id int64) (b1 bool, err error)) *UsersMock {
+	if mmUserExists.defaultExpectation != nil {
+		mmUserExists.mock.t.Fatalf("Default expectation is already set for the Users.UserExists method")
+	}
+
+	if len(mmUserExists.expectations) > 0 {
+		mmUserExists.mock.t.Fatalf("Some expectations are already set for the Users.UserExists method")
+	}
+
+	mmUserExists.mock.funcUserExists = f
+	mmUserExists.mock.funcUserExistsOrigin = minimock.CallerInfo(1)
+	return mmUserExists.mock
+}
+
+// When sets expectation for the Users.UserExists which will trigger the result defined by the following
+// Then helper
+func (mmUserExists *mUsersMockUserExists) When(id int64) *UsersMockUserExistsExpectation {
+	if mmUserExists.mock.funcUserExists != nil {
+		mmUserExists.mock.t.Fatalf("UsersMock.UserExists mock is already set by Set")
+	}
+
+	expectation := &UsersMockUserExistsExpectation{
+		mock:               mmUserExists.mock,
+		params:             &UsersMockUserExistsParams{id},
+		expectationOrigins: UsersMockUserExistsExpectationOrigins{origin: minimock.CallerInfo(1)},
+	}
+	mmUserExists.expectations = append(mmUserExists.expectations, expectation)
+	return expectation
+}
+
+// Then sets up Users.UserExists return parameters for the expectation previously defined by the When method
+func (e *UsersMockUserExistsExpectation) Then(b1 bool, err error) *UsersMock {
+	e.results = &UsersMockUserExistsResults{b1, err}
+	return e.mock
+}
+
+// Times sets number of times Users.UserExists should be invoked
+func (mmUserExists *mUsersMockUserExists) Times(n uint64) *mUsersMockUserExists {
+	if n == 0 {
+		mmUserExists.mock.t.Fatalf("Times of UsersMock.UserExists mock can not be zero")
+	}
+	mm_atomic.StoreUint64(&mmUserExists.expectedInvocations, n)
+	mmUserExists.expectedInvocationsOrigin = minimock.CallerInfo(1)
+	return mmUserExists
+}
+
+func (mmUserExists *mUsersMockUserExists) invocationsDone() bool {
+	if len(mmUserExists.expectations) == 0 && mmUserExists.defaultExpectation == nil && mmUserExists.mock.funcUserExists == nil {
+		return true
+	}
+
+	totalInvocations := mm_atomic.LoadUint64(&mmUserExists.mock.afterUserExistsCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmUserExists.expectedInvocations)
+
+	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
+}
+
+// UserExists implements mm_services.Users
+func (mmUserExists *UsersMock) UserExists(id int64) (b1 bool, err error) {
+	mm_atomic.AddUint64(&mmUserExists.beforeUserExistsCounter, 1)
+	defer mm_atomic.AddUint64(&mmUserExists.afterUserExistsCounter, 1)
+
+	mmUserExists.t.Helper()
+
+	if mmUserExists.inspectFuncUserExists != nil {
+		mmUserExists.inspectFuncUserExists(id)
+	}
+
+	mm_params := UsersMockUserExistsParams{id}
+
+	// Record call args
+	mmUserExists.UserExistsMock.mutex.Lock()
+	mmUserExists.UserExistsMock.callArgs = append(mmUserExists.UserExistsMock.callArgs, &mm_params)
+	mmUserExists.UserExistsMock.mutex.Unlock()
+
+	for _, e := range mmUserExists.UserExistsMock.expectations {
+		if minimock.Equal(*e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.b1, e.results.err
+		}
+	}
+
+	if mmUserExists.UserExistsMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmUserExists.UserExistsMock.defaultExpectation.Counter, 1)
+		mm_want := mmUserExists.UserExistsMock.defaultExpectation.params
+		mm_want_ptrs := mmUserExists.UserExistsMock.defaultExpectation.paramPtrs
+
+		mm_got := UsersMockUserExistsParams{id}
+
+		if mm_want_ptrs != nil {
+
+			if mm_want_ptrs.id != nil && !minimock.Equal(*mm_want_ptrs.id, mm_got.id) {
+				mmUserExists.t.Errorf("UsersMock.UserExists got unexpected parameter id, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+					mmUserExists.UserExistsMock.defaultExpectation.expectationOrigins.originId, *mm_want_ptrs.id, mm_got.id, minimock.Diff(*mm_want_ptrs.id, mm_got.id))
+			}
+
+		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmUserExists.t.Errorf("UsersMock.UserExists got unexpected parameters, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+				mmUserExists.UserExistsMock.defaultExpectation.expectationOrigins.origin, *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmUserExists.UserExistsMock.defaultExpectation.results
+		if mm_results == nil {
+			mmUserExists.t.Fatal("No results are set for the UsersMock.UserExists")
+		}
+		return (*mm_results).b1, (*mm_results).err
+	}
+	if mmUserExists.funcUserExists != nil {
+		return mmUserExists.funcUserExists(id)
+	}
+	mmUserExists.t.Fatalf("Unexpected call to UsersMock.UserExists. %v", id)
+	return
+}
+
+// UserExistsAfterCounter returns a count of finished UsersMock.UserExists invocations
+func (mmUserExists *UsersMock) UserExistsAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUserExists.afterUserExistsCounter)
+}
+
+// UserExistsBeforeCounter returns a count of UsersMock.UserExists invocations
+func (mmUserExists *UsersMock) UserExistsBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUserExists.beforeUserExistsCounter)
+}
+
+// Calls returns a list of arguments used in each call to UsersMock.UserExists.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmUserExists *mUsersMockUserExists) Calls() []*UsersMockUserExistsParams {
+	mmUserExists.mutex.RLock()
+
+	argCopy := make([]*UsersMockUserExistsParams, len(mmUserExists.callArgs))
+	copy(argCopy, mmUserExists.callArgs)
+
+	mmUserExists.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockUserExistsDone returns true if the count of the UserExists invocations corresponds
+// the number of defined expectations
+func (m *UsersMock) MinimockUserExistsDone() bool {
+	if m.UserExistsMock.optional {
+		// Optional methods provide '0 or more' call count restriction.
+		return true
+	}
+
+	for _, e := range m.UserExistsMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	return m.UserExistsMock.invocationsDone()
+}
+
+// MinimockUserExistsInspect logs each unmet expectation
+func (m *UsersMock) MinimockUserExistsInspect() {
+	for _, e := range m.UserExistsMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to UsersMock.UserExists at\n%s with params: %#v", e.expectationOrigins.origin, *e.params)
+		}
+	}
+
+	afterUserExistsCounter := mm_atomic.LoadUint64(&m.afterUserExistsCounter)
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UserExistsMock.defaultExpectation != nil && afterUserExistsCounter < 1 {
+		if m.UserExistsMock.defaultExpectation.params == nil {
+			m.t.Errorf("Expected call to UsersMock.UserExists at\n%s", m.UserExistsMock.defaultExpectation.returnOrigin)
+		} else {
+			m.t.Errorf("Expected call to UsersMock.UserExists at\n%s with params: %#v", m.UserExistsMock.defaultExpectation.expectationOrigins.origin, *m.UserExistsMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUserExists != nil && afterUserExistsCounter < 1 {
+		m.t.Errorf("Expected call to UsersMock.UserExists at\n%s", m.funcUserExistsOrigin)
+	}
+
+	if !m.UserExistsMock.invocationsDone() && afterUserExistsCounter > 0 {
+		m.t.Errorf("Expected %d calls to UsersMock.UserExists at\n%s but found %d calls",
+			mm_atomic.LoadUint64(&m.UserExistsMock.expectedInvocations), m.UserExistsMock.expectedInvocationsOrigin, afterUserExistsCounter)
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *UsersMock) MinimockFinish() {
 	m.finishOnce.Do(func() {
@@ -682,6 +1004,8 @@ func (m *UsersMock) MinimockFinish() {
 			m.MinimockLogInInspect()
 
 			m.MinimockNewUserInspect()
+
+			m.MinimockUserExistsInspect()
 		}
 	})
 }
@@ -706,5 +1030,6 @@ func (m *UsersMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockLogInDone() &&
-		m.MinimockNewUserDone()
+		m.MinimockNewUserDone() &&
+		m.MinimockUserExistsDone()
 }

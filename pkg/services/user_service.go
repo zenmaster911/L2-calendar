@@ -19,3 +19,7 @@ func (s *UserService) NewUser(username string) (int64, error) {
 func (s *UserService) LogIn(username string) (int64, error) {
 	return s.repo.LogIn(username)
 }
+
+func (s *UserService) UserExists(id int64) (bool, error) {
+	return s.repo.UserExists(id)
+}

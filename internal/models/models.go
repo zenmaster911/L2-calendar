@@ -18,8 +18,8 @@ type Event struct {
 	Title       string    `json:"title" validate:"required" db:"title"`
 	Starts      time.Time `json:"starts" validate:"required" db:"starts"`
 	Deadline    time.Time `json:"deadline" db:"deadline"`
-	Created     time.Time `json:"created" validate:"required" db:"created"`
-	Deleted     time.Time `json:"deleted" validate:"required" db:"deleted"`
+	Created     time.Time `json:"created"  db:"created"`
+	Deleted     time.Time `json:"deleted"  db:"deleted"`
 }
 
 type Reply struct {

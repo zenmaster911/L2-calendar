@@ -26,6 +26,13 @@ type EventsMock struct {
 	beforeDeleteEventCounter uint64
 	DeleteEventMock          mEventsMockDeleteEvent
 
+	funcEventExists          func(userid int64, eventid int64) (b1 bool, err error)
+	funcEventExistsOrigin    string
+	inspectFuncEventExists   func(userid int64, eventid int64)
+	afterEventExistsCounter  uint64
+	beforeEventExistsCounter uint64
+	EventExistsMock          mEventsMockEventExists
+
 	funcGetEvents          func(dateStart time.Time, dateEnd time.Time, userID int) (ra1 []models.Reply, err error)
 	funcGetEventsOrigin    string
 	inspectFuncGetEvents   func(dateStart time.Time, dateEnd time.Time, userID int)
@@ -58,6 +65,9 @@ func NewEventsMock(t minimock.Tester) *EventsMock {
 
 	m.DeleteEventMock = mEventsMockDeleteEvent{mock: m}
 	m.DeleteEventMock.callArgs = []*EventsMockDeleteEventParams{}
+
+	m.EventExistsMock = mEventsMockEventExists{mock: m}
+	m.EventExistsMock.callArgs = []*EventsMockEventExistsParams{}
 
 	m.GetEventsMock = mEventsMockGetEvents{mock: m}
 	m.GetEventsMock.callArgs = []*EventsMockGetEventsParams{}
@@ -412,6 +422,349 @@ func (m *EventsMock) MinimockDeleteEventInspect() {
 	if !m.DeleteEventMock.invocationsDone() && afterDeleteEventCounter > 0 {
 		m.t.Errorf("Expected %d calls to EventsMock.DeleteEvent at\n%s but found %d calls",
 			mm_atomic.LoadUint64(&m.DeleteEventMock.expectedInvocations), m.DeleteEventMock.expectedInvocationsOrigin, afterDeleteEventCounter)
+	}
+}
+
+type mEventsMockEventExists struct {
+	optional           bool
+	mock               *EventsMock
+	defaultExpectation *EventsMockEventExistsExpectation
+	expectations       []*EventsMockEventExistsExpectation
+
+	callArgs []*EventsMockEventExistsParams
+	mutex    sync.RWMutex
+
+	expectedInvocations       uint64
+	expectedInvocationsOrigin string
+}
+
+// EventsMockEventExistsExpectation specifies expectation struct of the Events.EventExists
+type EventsMockEventExistsExpectation struct {
+	mock               *EventsMock
+	params             *EventsMockEventExistsParams
+	paramPtrs          *EventsMockEventExistsParamPtrs
+	expectationOrigins EventsMockEventExistsExpectationOrigins
+	results            *EventsMockEventExistsResults
+	returnOrigin       string
+	Counter            uint64
+}
+
+// EventsMockEventExistsParams contains parameters of the Events.EventExists
+type EventsMockEventExistsParams struct {
+	userid  int64
+	eventid int64
+}
+
+// EventsMockEventExistsParamPtrs contains pointers to parameters of the Events.EventExists
+type EventsMockEventExistsParamPtrs struct {
+	userid  *int64
+	eventid *int64
+}
+
+// EventsMockEventExistsResults contains results of the Events.EventExists
+type EventsMockEventExistsResults struct {
+	b1  bool
+	err error
+}
+
+// EventsMockEventExistsOrigins contains origins of expectations of the Events.EventExists
+type EventsMockEventExistsExpectationOrigins struct {
+	origin        string
+	originUserid  string
+	originEventid string
+}
+
+// Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
+// the test will fail minimock's automatic final call check if the mocked method was not called at least once.
+// Optional() makes method check to work in '0 or more' mode.
+// It is NOT RECOMMENDED to use this option unless you really need it, as default behaviour helps to
+// catch the problems when the expected method call is totally skipped during test run.
+func (mmEventExists *mEventsMockEventExists) Optional() *mEventsMockEventExists {
+	mmEventExists.optional = true
+	return mmEventExists
+}
+
+// Expect sets up expected params for Events.EventExists
+func (mmEventExists *mEventsMockEventExists) Expect(userid int64, eventid int64) *mEventsMockEventExists {
+	if mmEventExists.mock.funcEventExists != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Set")
+	}
+
+	if mmEventExists.defaultExpectation == nil {
+		mmEventExists.defaultExpectation = &EventsMockEventExistsExpectation{}
+	}
+
+	if mmEventExists.defaultExpectation.paramPtrs != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by ExpectParams functions")
+	}
+
+	mmEventExists.defaultExpectation.params = &EventsMockEventExistsParams{userid, eventid}
+	mmEventExists.defaultExpectation.expectationOrigins.origin = minimock.CallerInfo(1)
+	for _, e := range mmEventExists.expectations {
+		if minimock.Equal(e.params, mmEventExists.defaultExpectation.params) {
+			mmEventExists.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmEventExists.defaultExpectation.params)
+		}
+	}
+
+	return mmEventExists
+}
+
+// ExpectUseridParam1 sets up expected param userid for Events.EventExists
+func (mmEventExists *mEventsMockEventExists) ExpectUseridParam1(userid int64) *mEventsMockEventExists {
+	if mmEventExists.mock.funcEventExists != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Set")
+	}
+
+	if mmEventExists.defaultExpectation == nil {
+		mmEventExists.defaultExpectation = &EventsMockEventExistsExpectation{}
+	}
+
+	if mmEventExists.defaultExpectation.params != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Expect")
+	}
+
+	if mmEventExists.defaultExpectation.paramPtrs == nil {
+		mmEventExists.defaultExpectation.paramPtrs = &EventsMockEventExistsParamPtrs{}
+	}
+	mmEventExists.defaultExpectation.paramPtrs.userid = &userid
+	mmEventExists.defaultExpectation.expectationOrigins.originUserid = minimock.CallerInfo(1)
+
+	return mmEventExists
+}
+
+// ExpectEventidParam2 sets up expected param eventid for Events.EventExists
+func (mmEventExists *mEventsMockEventExists) ExpectEventidParam2(eventid int64) *mEventsMockEventExists {
+	if mmEventExists.mock.funcEventExists != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Set")
+	}
+
+	if mmEventExists.defaultExpectation == nil {
+		mmEventExists.defaultExpectation = &EventsMockEventExistsExpectation{}
+	}
+
+	if mmEventExists.defaultExpectation.params != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Expect")
+	}
+
+	if mmEventExists.defaultExpectation.paramPtrs == nil {
+		mmEventExists.defaultExpectation.paramPtrs = &EventsMockEventExistsParamPtrs{}
+	}
+	mmEventExists.defaultExpectation.paramPtrs.eventid = &eventid
+	mmEventExists.defaultExpectation.expectationOrigins.originEventid = minimock.CallerInfo(1)
+
+	return mmEventExists
+}
+
+// Inspect accepts an inspector function that has same arguments as the Events.EventExists
+func (mmEventExists *mEventsMockEventExists) Inspect(f func(userid int64, eventid int64)) *mEventsMockEventExists {
+	if mmEventExists.mock.inspectFuncEventExists != nil {
+		mmEventExists.mock.t.Fatalf("Inspect function is already set for EventsMock.EventExists")
+	}
+
+	mmEventExists.mock.inspectFuncEventExists = f
+
+	return mmEventExists
+}
+
+// Return sets up results that will be returned by Events.EventExists
+func (mmEventExists *mEventsMockEventExists) Return(b1 bool, err error) *EventsMock {
+	if mmEventExists.mock.funcEventExists != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Set")
+	}
+
+	if mmEventExists.defaultExpectation == nil {
+		mmEventExists.defaultExpectation = &EventsMockEventExistsExpectation{mock: mmEventExists.mock}
+	}
+	mmEventExists.defaultExpectation.results = &EventsMockEventExistsResults{b1, err}
+	mmEventExists.defaultExpectation.returnOrigin = minimock.CallerInfo(1)
+	return mmEventExists.mock
+}
+
+// Set uses given function f to mock the Events.EventExists method
+func (mmEventExists *mEventsMockEventExists) Set(f func(userid int64, eventid int64) (b1 bool, err error)) *EventsMock {
+	if mmEventExists.defaultExpectation != nil {
+		mmEventExists.mock.t.Fatalf("Default expectation is already set for the Events.EventExists method")
+	}
+
+	if len(mmEventExists.expectations) > 0 {
+		mmEventExists.mock.t.Fatalf("Some expectations are already set for the Events.EventExists method")
+	}
+
+	mmEventExists.mock.funcEventExists = f
+	mmEventExists.mock.funcEventExistsOrigin = minimock.CallerInfo(1)
+	return mmEventExists.mock
+}
+
+// When sets expectation for the Events.EventExists which will trigger the result defined by the following
+// Then helper
+func (mmEventExists *mEventsMockEventExists) When(userid int64, eventid int64) *EventsMockEventExistsExpectation {
+	if mmEventExists.mock.funcEventExists != nil {
+		mmEventExists.mock.t.Fatalf("EventsMock.EventExists mock is already set by Set")
+	}
+
+	expectation := &EventsMockEventExistsExpectation{
+		mock:               mmEventExists.mock,
+		params:             &EventsMockEventExistsParams{userid, eventid},
+		expectationOrigins: EventsMockEventExistsExpectationOrigins{origin: minimock.CallerInfo(1)},
+	}
+	mmEventExists.expectations = append(mmEventExists.expectations, expectation)
+	return expectation
+}
+
+// Then sets up Events.EventExists return parameters for the expectation previously defined by the When method
+func (e *EventsMockEventExistsExpectation) Then(b1 bool, err error) *EventsMock {
+	e.results = &EventsMockEventExistsResults{b1, err}
+	return e.mock
+}
+
+// Times sets number of times Events.EventExists should be invoked
+func (mmEventExists *mEventsMockEventExists) Times(n uint64) *mEventsMockEventExists {
+	if n == 0 {
+		mmEventExists.mock.t.Fatalf("Times of EventsMock.EventExists mock can not be zero")
+	}
+	mm_atomic.StoreUint64(&mmEventExists.expectedInvocations, n)
+	mmEventExists.expectedInvocationsOrigin = minimock.CallerInfo(1)
+	return mmEventExists
+}
+
+func (mmEventExists *mEventsMockEventExists) invocationsDone() bool {
+	if len(mmEventExists.expectations) == 0 && mmEventExists.defaultExpectation == nil && mmEventExists.mock.funcEventExists == nil {
+		return true
+	}
+
+	totalInvocations := mm_atomic.LoadUint64(&mmEventExists.mock.afterEventExistsCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmEventExists.expectedInvocations)
+
+	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
+}
+
+// EventExists implements mm_repositories.Events
+func (mmEventExists *EventsMock) EventExists(userid int64, eventid int64) (b1 bool, err error) {
+	mm_atomic.AddUint64(&mmEventExists.beforeEventExistsCounter, 1)
+	defer mm_atomic.AddUint64(&mmEventExists.afterEventExistsCounter, 1)
+
+	mmEventExists.t.Helper()
+
+	if mmEventExists.inspectFuncEventExists != nil {
+		mmEventExists.inspectFuncEventExists(userid, eventid)
+	}
+
+	mm_params := EventsMockEventExistsParams{userid, eventid}
+
+	// Record call args
+	mmEventExists.EventExistsMock.mutex.Lock()
+	mmEventExists.EventExistsMock.callArgs = append(mmEventExists.EventExistsMock.callArgs, &mm_params)
+	mmEventExists.EventExistsMock.mutex.Unlock()
+
+	for _, e := range mmEventExists.EventExistsMock.expectations {
+		if minimock.Equal(*e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.b1, e.results.err
+		}
+	}
+
+	if mmEventExists.EventExistsMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmEventExists.EventExistsMock.defaultExpectation.Counter, 1)
+		mm_want := mmEventExists.EventExistsMock.defaultExpectation.params
+		mm_want_ptrs := mmEventExists.EventExistsMock.defaultExpectation.paramPtrs
+
+		mm_got := EventsMockEventExistsParams{userid, eventid}
+
+		if mm_want_ptrs != nil {
+
+			if mm_want_ptrs.userid != nil && !minimock.Equal(*mm_want_ptrs.userid, mm_got.userid) {
+				mmEventExists.t.Errorf("EventsMock.EventExists got unexpected parameter userid, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+					mmEventExists.EventExistsMock.defaultExpectation.expectationOrigins.originUserid, *mm_want_ptrs.userid, mm_got.userid, minimock.Diff(*mm_want_ptrs.userid, mm_got.userid))
+			}
+
+			if mm_want_ptrs.eventid != nil && !minimock.Equal(*mm_want_ptrs.eventid, mm_got.eventid) {
+				mmEventExists.t.Errorf("EventsMock.EventExists got unexpected parameter eventid, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+					mmEventExists.EventExistsMock.defaultExpectation.expectationOrigins.originEventid, *mm_want_ptrs.eventid, mm_got.eventid, minimock.Diff(*mm_want_ptrs.eventid, mm_got.eventid))
+			}
+
+		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmEventExists.t.Errorf("EventsMock.EventExists got unexpected parameters, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+				mmEventExists.EventExistsMock.defaultExpectation.expectationOrigins.origin, *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmEventExists.EventExistsMock.defaultExpectation.results
+		if mm_results == nil {
+			mmEventExists.t.Fatal("No results are set for the EventsMock.EventExists")
+		}
+		return (*mm_results).b1, (*mm_results).err
+	}
+	if mmEventExists.funcEventExists != nil {
+		return mmEventExists.funcEventExists(userid, eventid)
+	}
+	mmEventExists.t.Fatalf("Unexpected call to EventsMock.EventExists. %v %v", userid, eventid)
+	return
+}
+
+// EventExistsAfterCounter returns a count of finished EventsMock.EventExists invocations
+func (mmEventExists *EventsMock) EventExistsAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmEventExists.afterEventExistsCounter)
+}
+
+// EventExistsBeforeCounter returns a count of EventsMock.EventExists invocations
+func (mmEventExists *EventsMock) EventExistsBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmEventExists.beforeEventExistsCounter)
+}
+
+// Calls returns a list of arguments used in each call to EventsMock.EventExists.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmEventExists *mEventsMockEventExists) Calls() []*EventsMockEventExistsParams {
+	mmEventExists.mutex.RLock()
+
+	argCopy := make([]*EventsMockEventExistsParams, len(mmEventExists.callArgs))
+	copy(argCopy, mmEventExists.callArgs)
+
+	mmEventExists.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockEventExistsDone returns true if the count of the EventExists invocations corresponds
+// the number of defined expectations
+func (m *EventsMock) MinimockEventExistsDone() bool {
+	if m.EventExistsMock.optional {
+		// Optional methods provide '0 or more' call count restriction.
+		return true
+	}
+
+	for _, e := range m.EventExistsMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	return m.EventExistsMock.invocationsDone()
+}
+
+// MinimockEventExistsInspect logs each unmet expectation
+func (m *EventsMock) MinimockEventExistsInspect() {
+	for _, e := range m.EventExistsMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to EventsMock.EventExists at\n%s with params: %#v", e.expectationOrigins.origin, *e.params)
+		}
+	}
+
+	afterEventExistsCounter := mm_atomic.LoadUint64(&m.afterEventExistsCounter)
+	// if default expectation was set then invocations count should be greater than zero
+	if m.EventExistsMock.defaultExpectation != nil && afterEventExistsCounter < 1 {
+		if m.EventExistsMock.defaultExpectation.params == nil {
+			m.t.Errorf("Expected call to EventsMock.EventExists at\n%s", m.EventExistsMock.defaultExpectation.returnOrigin)
+		} else {
+			m.t.Errorf("Expected call to EventsMock.EventExists at\n%s with params: %#v", m.EventExistsMock.defaultExpectation.expectationOrigins.origin, *m.EventExistsMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcEventExists != nil && afterEventExistsCounter < 1 {
+		m.t.Errorf("Expected call to EventsMock.EventExists at\n%s", m.funcEventExistsOrigin)
+	}
+
+	if !m.EventExistsMock.invocationsDone() && afterEventExistsCounter > 0 {
+		m.t.Errorf("Expected %d calls to EventsMock.EventExists at\n%s but found %d calls",
+			mm_atomic.LoadUint64(&m.EventExistsMock.expectedInvocations), m.EventExistsMock.expectedInvocationsOrigin, afterEventExistsCounter)
 	}
 }
 
@@ -1510,6 +1863,8 @@ func (m *EventsMock) MinimockFinish() {
 		if !m.minimockDone() {
 			m.MinimockDeleteEventInspect()
 
+			m.MinimockEventExistsInspect()
+
 			m.MinimockGetEventsInspect()
 
 			m.MinimockNewEventInspect()
@@ -1539,6 +1894,7 @@ func (m *EventsMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockDeleteEventDone() &&
+		m.MinimockEventExistsDone() &&
 		m.MinimockGetEventsDone() &&
 		m.MinimockNewEventDone() &&
 		m.MinimockUpdateEventDone()

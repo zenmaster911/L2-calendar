@@ -30,3 +30,7 @@ func (s *EventService) DeleteEvent(userID, eventID int64) error {
 func (s EventService) GetEvents(dateStart, dateEnd time.Time, userID int) ([]models.Reply, error) {
 	return s.repo.GetEvents(dateStart, dateEnd, userID)
 }
+
+func (s EventService) EventExists(userid, eventid int64) (bool, error) {
+	return s.repo.EventExists(userid, eventid)
+}

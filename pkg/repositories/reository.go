@@ -16,7 +16,8 @@ type Rpository struct {
 type Users interface {
 	NewUser(string) (int64, error)
 	LogIn(username string) (int64, error)
-	UserExists(username string) (bool, error)
+	UserExists(id int64) (bool, error)
+	UsernameOccupied(username string) (bool, error)
 }
 
 type Events interface {
@@ -24,6 +25,7 @@ type Events interface {
 	UpdateEvent(userID, eventID int64, input models.UpdateEvent) error
 	DeleteEvent(userID, eventID int64) error
 	GetEvents(dateStart, dateEnd time.Time, userID int) ([]models.Reply, error)
+	EventExists(userid, eventid int64) (bool, error)
 }
 
 func NewRepo(db *sqlx.DB) *Rpository {

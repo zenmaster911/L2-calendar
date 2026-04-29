@@ -16,6 +16,7 @@ type Services struct {
 type Users interface {
 	NewUser(username string) (int64, error)
 	LogIn(username string) (int64, error)
+	UserExists(id int64) (bool, error)
 }
 
 type Events interface {
@@ -23,6 +24,7 @@ type Events interface {
 	UpdateEvent(userID, eventID int64, input models.UpdateEvent) error
 	DeleteEvent(userID, eventID int64) error
 	GetEvents(dateStart, dateEnd time.Time, userID int) ([]models.Reply, error)
+	EventExists(userid, eventid int64) (bool, error)
 }
 
 func NewService(repo *repositories.Rpository) *Services {

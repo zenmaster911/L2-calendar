@@ -20,7 +20,7 @@ func NewUsersPostgres(db *sqlx.DB) *UsersPostgres {
 
 func (r *UsersPostgres) NewUser(username string) (int64, error) {
 	var id int64
-	exists, err := r.UserExists(username)
+	exists, err := r.UsernameOccupied(username)
 	if err != nil {
 		return -1, fmt.Errorf("failed to create new user, %w", err)
 	}
@@ -44,10 +44,19 @@ func (r *UsersPostgres) LogIn(username string) (int64, error) {
 	return id, nil
 }
 
-func (r *UsersPostgres) UserExists(username string) (bool, error) {
+func (r *UsersPostgres) UsernameOccupied(username string) (bool, error) {
 	exists := false
 	query := "SELECT EXISTS(SELECT 1 FROM users WHERE username=$1)"
 	if err := r.db.QueryRow(query, username).Scan(&exists); err != nil {
+		return false, fmt.Errorf("failed to check user existance due to %w", err)
+	}
+	return exists, nil
+}
+
+func (r *UsersPostgres) UserExists(id int64) (bool, error) {
+	exists := false
+	query := "SELECT EXISTS(SELECT 1 FROM users WHERE id=$1)"
+	if err := r.db.QueryRow(query, id).Scan(&exists); err != nil {
 		return false, fmt.Errorf("failed to check user existance due to %w", err)
 	}
 	return exists, nil

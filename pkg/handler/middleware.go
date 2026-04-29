@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
 )
 
 const tformat = "2006-01-02"
@@ -142,4 +144,19 @@ func (h *Handler) rLogger(next http.Handler) http.Handler {
 			slog.Duration("duration", time.Since(start)),
 		)
 	})
+}
+
+func sendValidationErrors(w http.ResponseWriter, err error) {
+	var errors []string
+	for _, err := range err.(validator.ValidationErrors) {
+		errors = append(errors, fmt.Sprintf("%s is %s", err.Field(), err.Tag()))
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
+		"error":  "Validation failed",
+		"fields": errors,
+	}); err != nil {
+		http.Error(w, "encodin response error", http.StatusInternalServerError)
+	}
 }
